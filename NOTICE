@@ -1,0 +1,79 @@
+inkbench
+Copyright (c) 2026 KarLex AI, Inc. Licensed under the MIT License (LICENSE).
+
+inkbench transcribes scoring rules and small functions from the following MIT-licensed projects, so that its numbers
+are comparable to the published ones. Each source file that does so names its origin. Their copyright notices and the
+MIT permission notice (reproduced once at the end of this file) apply to those portions.
+
+1. DomRusso2/reader-v2 (https://github.com/DomRusso2/reader-v2), MIT, Copyright (c) 2026 Domenico Russo.
+   - src/inkbench/metrics.py: auc_russo (scripts/v2_run.py, auc: 300 000 pixels per class, seed 0) and
+     fa_at_recall (the blank-papyrus false-alarm rule of scripts/bkill.py).
+   - src/inkbench/inputs.py: pick_crops (scripts/bkill.py, pick_crops) and the torch "area" resize of the suite.
+   - src/inkbench/score.py, src/inkbench/refs.py: the evaluation regions of scripts/v2_run.py (evaluate: union of
+     supervision and validation, the 0009B union taken on the fine canvas, map classes >= 128 and <= 40).
+   - src/inkbench/predict.py: score_map, the 8-bit scoring of scripts/hecate_eval.py (round(255 p), resized back
+     onto the native canvas with INTER_LINEAR).
+
+2. DomRusso2/ir-truth-9um (https://github.com/DomRusso2/ir-truth-9um), code MIT, Domenico Russo.
+   - src/inkbench/metrics.py: ir_quantise, ir_draws and ir_truth_score (scripts/score_map.py: percentile
+     quantisation, 2000 random placements of the letter mask).
+
+3. TAUIL-Abd-Elilah/9um-reader-letter-shape (https://github.com/TAUIL-Abd-Elilah/9um-reader-letter-shape), MIT,
+   Copyright (c) 2026 TAUIL Abd Elilah.
+   - src/inkbench/metrics.py: auc_tauil (src/eval9v2.py, auc) and highpass / hp_score (src/hp_eval.py).
+   - src/inkbench/score.py: the near-2 mm human-label region (ink pixels and no-ink pixels within 214 px of ink).
+
+4. Nieuwlaar/ink9um-dense-native (https://huggingface.co/Nieuwlaar/ink9um-dense-native), MIT (model card),
+   Erwin Nieuwlaar.
+   - src/inkbench/metrics.py: auc_nieuwlaar, native78_thresholds, native78_classes, nieuwlaar_pred,
+     nieuwlaar_fp_control and misregistration_auc (native-eval/native_bench.py).
+
+5. Jashann/vesuvius-sheet-chain (https://github.com/Jashann/vesuvius-sheet-chain), MIT,
+   Copyright (c) 2026 Jashanjot Singh Gill and Nhat Nam Tran.
+   - src/inkbench/score.py: the hf_mask_edge200 region of sheetchain/score_vs_labels.py (label mask, CT present,
+     at least 200 px from the edge of the render).
+
+6. slchicoineau-creator/tifxyz-canvas-map (https://github.com/slchicoineau-creator/tifxyz-canvas-map), MIT,
+   Copyright (c) 2026 Sebastien Chicoineau and Chris Thomas.
+   - src/inkbench/canvasmap.py: an independent implementation of their canvas-map rule (no code copied).
+   - tests/test_canvasmap.py: three rows of results/pair_maps.tsv as test data.
+
+Methods used without copying code (credited here and in README.md):
+
+7. ChullMotors/ink-nullkit (https://github.com/ChullMotors/ink-nullkit), MIT, Copyright (c) 2026 Chris Hull.
+   - src/inkbench/bootstrap.py follows the design of nullkit's paired_auroc_diff (256 px blocks with at least
+     500 labelled pixels, the same draw for both readers, 2000 draws, MDE = 2.8 SD); the code is new.
+
+8. ShribyrLabs/vesuvius-reports (https://github.com/ShribyrLabs/vesuvius-reports), MIT,
+   Copyright (c) 2026 Chris Scheirer / Shribyr Labs.
+   - The letter-scale score (report 02: Pearson r after a 48 um Gaussian high-pass), as item 3 applies it.
+
+9. Nieuwlaar/pherc343-first-letters (https://github.com/Nieuwlaar/pherc343-first-letters), MIT,
+   Copyright (c) 2026 Erwin Nieuwlaar.
+   - src/inkbench/ensemble.py re-implements the ensemble rule of ink/scripts/ensemble_maps.py (per-model p1/p99.5
+     stretch, z-score, mean of the z-scores) for single-depth maps.
+
+At run time inkbench imports inksweep (MIT, KarLex AI, Inc.) for the readers, their pinned weights and the
+inference engine. Model weights, scan data and anything derived from scan data (surface volumes, ink maps, labels,
+images) are not part of inkbench: they are downloaded from their authors' repositories and the Vesuvius Challenge
+open-data bucket under their own licences (scan data and derived data: CC BY-NC 4.0).
+
+MIT License (applies to the portions listed above, with the respective copyright notices):
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

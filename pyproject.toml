@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inkbench"
+dynamic = ["version"]                      # from src/inkbench/__init__.py
+description = "A benchmark of the public 9 um ink-detection readers for the Herculaneum scrolls: eight benchmarks, exact label transfer, leakage flags, paired block bootstrap and a reproduction check of the published numbers."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "KarLex AI, Inc." }]
+requires-python = ">=3.12"
+keywords = ["vesuvius-challenge", "herculaneum", "ink-detection", "benchmark", "papyrus", "x-ray-ct"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+# Predictions run through inksweep, whose torch (and, for the villa-family readers, the organisers' vesuvius package)
+# is installed separately for the CUDA build of the host: see README, Quick start, and node/setup_inkbench.sh.
+# Scoring runs on the CPU but also needs torch (Reader v2's area resize) and inksweep's reader registry.
+dependencies = [
+    "inksweep>=0.1.0",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "zarr>=3,<4",
+    "crc32c>=2.7",
+    "tifffile>=2024.8.30",
+    "imagecodecs>=2024.1.1",
+    "opencv-python-headless>=4.10",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/inksweep/inkbench"
+Issues = "https://github.com/inksweep/inkbench/issues"
+Changelog = "https://github.com/inksweep/inkbench/blob/main/CHANGELOG.md"
+
+[project.scripts]
+inkbench = "inkbench.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "inkbench.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+inkbench = ["resources/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
