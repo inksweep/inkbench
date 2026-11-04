@@ -26,7 +26,7 @@ from .bootstrap import SegBlocks, auc_blocks, fa_blocks, hp_blocks
 from .catalog import BENCHMARKS, W047, W053, Benchmark
 from .data import local_segment
 from .inputs import CROP, Input, inputs_for
-from .provenance import trained_on, trained_on_any
+from .provenance import source_overlap_evidence, trained_on, trained_on_any
 from .zio import open_array, read_image
 
 LOG = logging.getLogger("inkbench.score")
@@ -430,6 +430,10 @@ def score_benchmark(bench_name: str, readers: Optional[list[str]] = None, plugin
             vals = [x for x in r["per_segment"].values() if x is not None and x == x]
             r["mean"] = float(np.mean(vals)) if vals else None
             r["trained_on"] = {s.tag: leakage(name, s.sample, local_segment(s).name) for s in bench.segs}
+            if bench_name == "v2_heldout" and proto == "map_exact":
+                overlap = {s.tag: source_overlap_evidence(name, s.sample, local_segment(s).name) for s in bench.segs}
+                if any(v is not None for v in overlap.values()):
+                    r["source_overlap_evidence"] = {tag: value for tag, value in overlap.items() if value is not None}
         (out_dir / f"{name}.json").write_text(json.dumps(res, indent=1, default=float))
         flat = {}
         for proto, items in blocks.items():

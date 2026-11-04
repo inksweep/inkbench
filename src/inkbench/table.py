@@ -45,6 +45,13 @@ def leak_cell(score: dict, protocols: Sequence[str]) -> str:
     return "n/a" if flags and all(v == "n/a" for v in flags.values()) else "no"
 
 
+def source_overlap_cell(score: dict, protocols: Sequence[str]) -> str:
+    """Audited segment tags with possible center-stack CT source reuse; ``-`` means not assessed."""
+    tags = {tag for p in protocols for tag, evidence in score.get(p, {}).get("source_overlap_evidence", {}).items()
+            if evidence.get("kind") == "possible_center_stack_source_reuse"}
+    return ",".join(sorted(tags)) if tags else "-"
+
+
 def reproduction() -> list[dict]:
     """One row per published number: ours, the difference, the worst per-segment difference and the verdict."""
     rows = []
@@ -139,9 +146,13 @@ def render(reference: str = "readerv3", n_boot: int = 2000) -> str:
         readers = [r for r in sc if not r.startswith("_")]
         if not readers:
             continue
+        show_overlap = name == "v2_heldout"
+        header = "| reader | " + " | ".join(f"{p}{' (primary)' if p == b.primary else ''}" for p in b.protocols)
+        header += " | trained on a test segment (? = unknown) |"
+        if show_overlap:
+            header += " source overlap audited (possible; - = not assessed) |"
         out += [f"## {name} ({b.kind}): {b.notes}", "",
-                "| reader | " + " | ".join(f"{p}{' (primary)' if p == b.primary else ''}" for p in b.protocols)
-                + " | trained on a test segment (? = unknown) |", "|---" * (len(b.protocols) + 2) + "|"]
+                header, "|---" * (len(b.protocols) + 2 + int(show_overlap)) + "|"]
         for r in readers:
             cells = []
             for p in b.protocols:
@@ -149,7 +160,10 @@ def render(reference: str = "readerv3", n_boot: int = 2000) -> str:
                 ci = bootstrap_ci([s for _, s in load_blocks(name, r, p)], n_boot=min(n_boot, 500)) \
                     if m is not None else [None, None]
                 cells.append(f"{_fmt(m)} [{_fmt(ci[0])}, {_fmt(ci[1])}]" if m is not None else "-")
-            out.append(f"| {r} | " + " | ".join(cells) + f" | {leak_cell(sc[r], b.protocols)} |")
+            row = f"| {r} | " + " | ".join(cells) + f" | {leak_cell(sc[r], b.protocols)} |"
+            if show_overlap:
+                row += f" {source_overlap_cell(sc[r], b.protocols)} |"
+            out.append(row)
         ext = sc.get("_external")
         if ext:
             out += ["", "Published map files scored directly: " +

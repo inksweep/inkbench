@@ -1,4 +1,4 @@
-"""Leakage flags: whether a public reader's published training set includes a benchmark segment.
+"""Training-set flags and separately measured physical-source overlap evidence.
 
 ``trained_on(reader, sample, segment_folder)`` answers
 
@@ -11,9 +11,13 @@
 The segment lists are in ``resources/public_training_sets.json``, extracted from each reader's published configuration
 (the sources are listed in that file under ``_sources``). An ensemble carries the flags of its members
 (:func:`trained_on_any`).
+
+``source_overlap_evidence`` is an additive case study for Reader v2's two
+PHerc0500P2 held-outs. It does not change the exact-ID training flag or score.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import re
 from functools import lru_cache
@@ -24,6 +28,35 @@ from typing import Iterable
 @lru_cache(maxsize=1)
 def training_sets() -> dict:
     return json.loads((Path(__file__).parent / "resources" / "public_training_sets.json").read_text())
+
+
+@lru_cache(maxsize=1)
+def source_overlap_catalog() -> dict:
+    """Pinned source and method metadata for the Reader-v2 case study."""
+    return json.loads((Path(__file__).parent / "resources" / "source_overlap_evidence.json").read_text())
+
+
+def source_overlap_evidence(reader: str, sample: str, segment_folder: str) -> dict | None:
+    """Possible raw-CT center-stack reuse for audited segments; ``None`` means *not assessed*.
+
+    The counts are scored UV pixels whose center stacks share at least one
+    contributing raw-CT interpolation corner with their nearest supervised
+    training UV under a possible training depth window. They do not establish
+    that an SGD patch contained that UV or that AUC was inflated.
+    """
+    catalog = source_overlap_catalog()
+    if reader != catalog["applies_to_reader"] or sample != "PHerc0500P2":
+        return None
+    record = catalog["segments"].get(seg_id(segment_folder))
+    if record is None:
+        return None
+    return {
+        "evidence_id": catalog["evidence_id"],
+        "kind": catalog["method"]["kind"],
+        "score_grid_by_class": deepcopy(record["score_grid_by_class"]),
+        "excluded_by_geometry_gate": record["excluded_by_geometry_gate"],
+        "scored_without_nearest_training_uv": record["scored_without_nearest_training_uv"],
+    }
 
 
 def seg_id(segment_folder: str) -> str:
