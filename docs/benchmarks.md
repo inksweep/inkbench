@@ -148,6 +148,29 @@ A flag is `yes` when the segment is listed, `unknown` when the reader's lists ar
 (`n/a` for a reader without a record, such as a plugin). An ensemble carries its members' flags. Tables print the
 flagged segments, unknown ones with `?`. No reader lists PHerc0841 or PHerc1447.
 
+The separate `source_overlap_evidence` field currently covers Reader v2's two PHerc0500P2 held-outs only. On a
+5-pixel scored UV grid, it records whether the held-out 17-layer center stack and its nearest normal-aligned,
+supervised training UV could draw from at least one identical integer raw-CT interpolation corner under the five
+documented training depth windows. This applies to `map_exact` only. The machine-readable counts and pinned input provenance are in
+[`source_overlap_evidence.json`](../src/inkbench/resources/source_overlap_evidence.json). A score file carries the
+per-segment class counts beside `trained_on`; the `v2_heldout` table names audited segments in a separate column. `-` in that
+column means *not assessed*, not source-disjoint.
+
+| Reader v2 held-out | Ink: possible corner reuse / usable scored pixels | Non-ink: possible corner reuse / usable scored pixels |
+|---|---:|---:|
+| PHerc0500P2 371 | 15,894 / 21,343 | 118,125 / 148,493 |
+| PHerc0500P2 377 | 16,255 / 26,222 | 174,635 / 277,258 |
+
+These are possible center-stack source matches, not observed SGD patch inclusion. Comparing one nearest training
+center can miss other training UVs and the full patch footprint. Representative surface-volume profiles were
+byte-checked on the four leading training meshes; minor meshes were not directly checked. The released checkpoint
+does not pin the exact Villa training Git revision, so the documented depth-window setting is an assumption. This
+case study does not establish that physical overlap changed either AUC or the exact-ID `trained_on` flags.
+
+**Integration status:** This local candidate bundles the summary and input pins, but the complete audit script and
+result manifests are not yet published here. Those reproducibility assets must accompany any upstream pull request;
+the summary alone is not enough for third parties to verify the counts.
+
 ## Statistics
 
 `bootstrap.py` resamples 256 px blocks (spatially correlated pixels are not independent), the design of C. Hull's

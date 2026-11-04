@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "evidence_id": "reader-v2-pherc0500p2-center-stack-ct-corners-v1",
+  "applies_to_reader": "readerv2",
+  "applies_to_benchmark": "v2_heldout",
+  "applies_to_protocol": "map_exact",
+  "public_reproducer_status": "pending: the full audit implementation and result manifests are not yet published with this candidate integration",
+  "method": {
+    "kind": "possible_center_stack_source_reuse",
+    "heldout_uv_grid_stride_px": 5,
+    "nearest_training_uv_requires_supervision_at_depth": 14,
+    "normal_alignment_abs_min": 0.9,
+    "heldout_center_layers_inclusive": [
+      6,
+      22
+    ],
+    "training_jitter_start_layers": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "training_jitter_window_depth_layers": 17,
+    "intersection_unit": "integer raw-CT trilinear interpolation corner voxels",
+    "scope": "Each geometry-valid scored UV and its nearest normal-aligned supervised training UV, not a full training patch.",
+    "interpretation": "Possible source-corner reuse under the documented five training depth windows. This does not establish a sampled SGD patch or a causal change in AUC."
+  },
+  "source": {
+    "training_config_url": "https://raw.githubusercontent.com/DomRusso2/reader-v2/02c7b46987813c78f56dd99f38c5a84b65a9cd2a/train_config.json",
+    "training_config_sha256": "a69e9cf23263d4b17a85f05501333408f923f67f65b6f4ebc6c4539ceb1e81ec",
+    "supervision_archive_url": "https://huggingface.co/datasets/domenicor046/reader-v2-labels/resolve/main/reader-v2-dense-native-labels.tar",
+    "supervision_archive_sha256": "fb9140a37d2ceb5fb184894e33a4d9e0657f52ce47927fc6d76e89ddfc11b2a5",
+    "raw_ct_zarray_url": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com/PHerc0500P2/volumes/20250820143440-9.362um-1.2m-113keV-masked.zarr/0/.zarray",
+    "raw_ct_zarray_sha256": "9b8f1fe7978dc7dda432b1e2a08eee74c1b5c976f61d69840ffbb9dfcc54fe9c",
+    "native_meshes_and_teacher_maps": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com/PHerc0500P2/segments/",
+    "renderer_validation": "Representative 28-layer profiles matched published native surface volumes byte for byte on four leading training meshes; remaining minor meshes were not directly validated.",
+    "training_code_revision": "not pinned by released checkpoint; analysis follows documented default depth windows"
+  },
+  "segments": {
+    "20250716055229": {
+      "heldout_segment": "20250716055229-z_dbg_gen_00371_inp_hr",
+      "score_grid_by_class": {
+        "ink": {
+          "usable_scored_pixels": 21343,
+          "possible_corner_reuse_any_jitter": 15894,
+          "possible_corner_reuse_all_five_jitters": 15208
+        },
+        "non_ink": {
+          "usable_scored_pixels": 148493,
+          "possible_corner_reuse_any_jitter": 118125,
+          "possible_corner_reuse_all_five_jitters": 113339
+        }
+      },
+      "excluded_by_geometry_gate": 8756,
+      "scored_without_nearest_training_uv": 297,
+      "score_mask_sha256": "01309129234c832a610349ec297234b234e4eb8261b050e8498990d8d25efcaa",
+      "nearest_supervision_audit_sha256": "8df59a51fcb7933937a163fb8d279dd9fb948622d38bfec3924744040e93b578"
+    },
+    "20250716055230": {
+      "heldout_segment": "20250716055230-z_dbg_gen_00377_inp_hr",
+      "score_grid_by_class": {
+        "ink": {
+          "usable_scored_pixels": 26222,
+          "possible_corner_reuse_any_jitter": 16255,
+          "possible_corner_reuse_all_five_jitters": 15547
+        },
+        "non_ink": {
+          "usable_scored_pixels": 277258,
+          "possible_corner_reuse_any_jitter": 174635,
+          "possible_corner_reuse_all_five_jitters": 166981
+        }
+      },
+      "excluded_by_geometry_gate": 10678,
+      "scored_without_nearest_training_uv": 1635,
+      "score_mask_sha256": "59dd7c0d7575b95ab1c1543cc1a1301f6407848e5aa2eef6b5b105d7ea0dfb49",
+      "nearest_supervision_audit_sha256": "cf3ebecf7f6e4e686df221ec4e5da72784899bc8400e71515f90396a01921125"
+    }
+  }
+}
