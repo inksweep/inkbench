@@ -4,7 +4,8 @@
   "applies_to_reader": "readerv2",
   "applies_to_benchmark": "v2_heldout",
   "applies_to_protocol": "map_exact",
-  "public_reproducer_status": "pending: the full audit implementation and result manifests are not yet published with this candidate integration",
+  "public_reproducer_url": "https://github.com/LubuSeb/vesuvius-source-overlap-audit/tree/af9915019d50a0d523cdae234fd96f7a2cb54c1c",
+  "public_results_url": "https://github.com/LubuSeb/vesuvius-source-overlap-audit/tree/af9915019d50a0d523cdae234fd96f7a2cb54c1c/case_study",
   "method": {
     "kind": "possible_center_stack_source_reuse",
     "heldout_uv_grid_stride_px": 5,

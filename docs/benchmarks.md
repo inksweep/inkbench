@@ -155,6 +155,8 @@ documented training depth windows. This applies to `map_exact` only. The machine
 [`source_overlap_evidence.json`](../src/inkbench/resources/source_overlap_evidence.json). A score file carries the
 per-segment class counts beside `trained_on`; the `v2_heldout` table names audited segments in a separate column. `-` in that
 column means *not assessed*, not source-disjoint.
+The [source-overlap audit](https://github.com/LubuSeb/vesuvius-source-overlap-audit/tree/af9915019d50a0d523cdae234fd96f7a2cb54c1c)
+contains the reproducible tool, pinned source references, figures, and case-study results.
 
 | Reader v2 held-out | Ink: possible corner reuse / usable scored pixels | Non-ink: possible corner reuse / usable scored pixels |
 |---|---:|---:|
