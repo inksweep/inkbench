@@ -33,3 +33,16 @@ def test_devices(monkeypatch):
     assert devices("0,2") == ["cuda:0", "cuda:2"]
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "5,6,7")
     assert devices() == ["cuda:0", "cuda:1", "cuda:2"]          # relative to the visible set
+
+
+def test_devices_falls_back_to_apple_gpu(monkeypatch):
+    import pytest
+    import torch
+
+    monkeypatch.delenv("CUDA_VISIBLE_DEVICES", raising=False)
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 0)
+    monkeypatch.setattr(torch.backends.mps, "is_available", lambda: True)
+    assert devices() == ["mps"]
+    monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
+    with pytest.raises(RuntimeError, match="no CUDA or Apple"):
+        devices()
