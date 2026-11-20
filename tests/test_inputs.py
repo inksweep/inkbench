@@ -46,3 +46,14 @@ def test_devices_falls_back_to_apple_gpu(monkeypatch):
     monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
     with pytest.raises(RuntimeError, match="no CUDA or Apple"):
         devices()
+
+
+def test_meshes_for_prefers_the_plain_mesh():
+    from inkbench.data import meshes_for
+
+    names = ["20260220213127-on-20260319124803-2.403um-t2.tifxyz", "20260220213127-on-20260319124803-2.403um.tifxyz",
+             "20260220213127-on-20250821151531-9.366um.tifxyz"]
+    got = meshes_for(names, ["20260319124803", "20250821151531"])
+    assert got == {"20260319124803": "20260220213127-on-20260319124803-2.403um.tifxyz",
+                   "20250821151531": "20260220213127-on-20250821151531-9.366um.tifxyz"}
+    assert meshes_for(names[:1], ["20260319124803"]) == {"20260319124803": names[0]}   # only a suffixed mesh

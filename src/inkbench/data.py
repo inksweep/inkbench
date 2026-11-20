@@ -75,13 +75,23 @@ def choose_teacher(files: list[str], kind: str, fine_vol: Optional[str]) -> Opti
     return hits[0] if hits else None
 
 
+PLAIN_MESH = re.compile(r"-on-\d+-[\d.]+um\.tifxyz$")
+
+
 def meshes_for(names: list[str], vol_ids: list[str]) -> dict[str, str]:
-    """The tifxyz mesh folder of each volume id (``*-on-<volume>-*.tifxyz``)."""
+    """The tifxyz mesh folder of each volume id (``*-on-<volume>-<voxel>um.tifxyz``).
+
+    A volume can have more than one mesh: since the PHerc0841 2.4 um volume gained ``...-2.403um-t2.tifxyz`` beside
+    ``...-2.403um.tifxyz``, the first listed name was the ``-t2`` mesh (a 4x coarser grid on a canvas 5-12 px off),
+    while the ink labels are drawn on the plain mesh's canvas, so every exact protocol was skipped ("no pyramid
+    level of the fine canvas"). The plain ``<voxel>um.tifxyz`` name is preferred; otherwise the first match.
+    """
     out = {}
     for v in vol_ids:
         hit = [n for n in names if f"-on-{v}-" in n and n.endswith(".tifxyz")]
         if hit:
-            out[v] = hit[0]
+            plain = [n for n in hit if PLAIN_MESH.search(n)]
+            out[v] = (plain or hit)[0]
     return out
 
 
