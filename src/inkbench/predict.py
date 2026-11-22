@@ -152,7 +152,10 @@ def _worker(rank: int, device: str, my_inputs: list, results, readers: Sequence[
             except Exception:
                 results.put(("error", f"{inp.key} {name}: {traceback.format_exc()}"))
         del sweep
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        elif str(device).startswith("mps"):
+            torch.mps.empty_cache()
     results.put(("done", rank))
 
 
@@ -215,7 +218,7 @@ def _surface_bytes(inp: Input) -> int:
 
 
 def devices(gpus: Optional[str] = None) -> list[str]:
-    """CUDA devices for the prediction workers, one worker each. ``gpus`` (``"0,1"``) names devices of the visible
+    """GPU devices for the prediction workers, one worker each (CUDA; on a Mac without CUDA, the Apple GPU as ``mps``). ``gpus`` (``"0,1"``) names devices of the visible
     set; without it every visible device is used (as many as CUDA_VISIBLE_DEVICES lists, else all)."""
     if gpus:
         return [f"cuda:{int(g)}" for g in gpus.split(",") if g.strip()]
@@ -227,5 +230,10 @@ def devices(gpus: Optional[str] = None) -> list[str]:
 
         n = torch.cuda.device_count()
     if n < 1:
-        raise RuntimeError("no CUDA device visible: prediction needs a GPU (scoring does not)")
+        import torch
+
+        mps = getattr(torch.backends, "mps", None)
+        if mps is not None and mps.is_available():
+            return ["mps"]                                      # one Apple GPU: one worker
+        raise RuntimeError("no CUDA or Apple (MPS) GPU visible: prediction needs a GPU (scoring does not)")
     return [f"cuda:{k}" for k in range(n)]
